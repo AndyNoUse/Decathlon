@@ -10,7 +10,7 @@ public class DecaTest {
     @Test
     public void deca100M10Seconds() {
         Deca100M deca100M = new Deca100M();
-        Assert.assertEquals(deca100M.calculateResult(11), 861);
+        Assert.assertEquals(deca100M.calculateResult(10), 1096);
     }
 
     @Test
