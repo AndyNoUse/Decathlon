@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 
 import java.awt.*;
 
+import com.example.decathlon.common.InvalidResultException;
 import com.example.decathlon.deca.*;
 
 
@@ -125,6 +126,8 @@ public class MainGUI {
                 outputArea.append("Score: " + score + "\n\n");
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Please enter a valid number for the result.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            } catch (InvalidResultException ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage(), "Invalid Result", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
