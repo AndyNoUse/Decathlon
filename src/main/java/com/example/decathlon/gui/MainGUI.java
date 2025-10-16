@@ -7,6 +7,7 @@ import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 
+import com.example.decathlon.common.InvalidResultException;
 import com.example.decathlon.deca.*;
 import com.example.decathlon.heptathlon.*;
 
@@ -243,6 +244,8 @@ public class MainGUI {
                 JOptionPane.showMessageDialog(frame, ex.getMessage(), "Not implemented", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(frame, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            } catch (InvalidResultException ex) {
+                JOptionPane.showMessageDialog(null, ex.getMessage(), "Invalid Result", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
