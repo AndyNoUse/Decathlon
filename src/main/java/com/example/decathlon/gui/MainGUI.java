@@ -1,5 +1,6 @@
 package com.example.decathlon.gui;
 
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -242,15 +243,15 @@ public class MainGUI {
                 JOptionPane.showMessageDialog(frame, "Please enter a valid number for the result.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
             } catch (UnsupportedOperationException ex) {
                 JOptionPane.showMessageDialog(frame, ex.getMessage(), "Not implemented", JOptionPane.ERROR_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(frame, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             } catch (InvalidResultException ex) {
                 JOptionPane.showMessageDialog(null, ex.getMessage(), "Invalid Result", JOptionPane.ERROR_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(frame, "Unexpected error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-    private int calculateScore(String discipline, double result) {
+    private int calculateScore(String discipline, double result) throws InvalidResultException {
         if (currentMode == Mode.DEC) {
             switch (discipline) {
                 case "100m":         return new Deca100M().calculateResult(result);
