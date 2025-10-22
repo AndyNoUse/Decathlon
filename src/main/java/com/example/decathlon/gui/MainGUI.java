@@ -1,6 +1,5 @@
 package com.example.decathlon.gui;
 
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -28,7 +27,6 @@ public class MainGUI {
     private JTable scoreTable;
     private DefaultTableModel tableModel;
 
-    // Kolumner för decathlon/heptathlon (etiketter måste matcha switch-case)
     private static final List<String> DEC_EVENTS = List.of(
             "100m", "400m", "1500m", "110m Hurdles",
             "Long Jump", "High Jump", "Pole Vault",
@@ -96,13 +94,11 @@ public class MainGUI {
 
         frame.add(top, BorderLayout.NORTH);
 
-
         outputArea = new JTextArea(6, 60);
         outputArea.setEditable(false);
         JScrollPane logScroll = new JScrollPane(outputArea);
         logScroll.setBorder(BorderFactory.createTitledBorder("Log"));
         frame.add(logScroll, BorderLayout.CENTER);
-
 
         tableModel = buildTableModelForMode(currentMode);
         scoreTable = new JTable(tableModel);
@@ -113,7 +109,6 @@ public class MainGUI {
         JScrollPane tableScroll = new JScrollPane(scoreTable);
         tableScroll.setBorder(BorderFactory.createTitledBorder("Scores Matrix"));
         frame.add(tableScroll, BorderLayout.SOUTH);
-
 
         UIManager.put("Label.font", new Font("SansSerif", Font.PLAIN, 14));
         UIManager.put("Button.font", new Font("SansSerif", Font.BOLD, 14));
@@ -129,38 +124,35 @@ public class MainGUI {
         if (newMode == currentMode) return;
         currentMode = newMode;
 
-
         disciplineBox.removeAllItems();
         List<String> list = (currentMode == Mode.DEC) ? DEC_EVENTS : HEP_EVENTS;
         for (String d : list) disciplineBox.addItem(d);
 
-
         Set<String> existingNames = new LinkedHashSet<>();
-        int nameCol = 0;
+        int oldNameCol = tableModel.findColumn("Competitor");
         for (int r = 0; r < tableModel.getRowCount(); r++) {
-            Object val = tableModel.getValueAt(r, nameCol);
+            Object val = tableModel.getValueAt(r, oldNameCol);
             if (val != null) existingNames.add(val.toString());
         }
 
         tableModel = buildTableModelForMode(currentMode);
         scoreTable.setModel(tableModel);
 
-        for (String nm : existingNames) {
-            addRowIfMissing(nm);
-        }
+        for (String nm : existingNames) addRowIfMissing(nm);
+        updateRanks();
     }
 
     private DefaultTableModel buildTableModelForMode(Mode mode) {
         Vector<String> cols = new Vector<>();
+        cols.add("Rank");
         cols.add("Competitor");
-
         List<String> events = (mode == Mode.DEC) ? DEC_EVENTS : HEP_EVENTS;
         cols.addAll(events);
         cols.add("Total");
 
         return new DefaultTableModel(new Vector<>(), cols) {
             @Override public boolean isCellEditable(int row, int column) {
-                return column == 0;
+                return getColumnName(column).equals("Competitor");
             }
         };
     }
@@ -169,17 +161,20 @@ public class MainGUI {
         int row = findRowByName(name);
         if (row == -1) {
             Vector<Object> v = new Vector<>();
+            v.add(0);
             v.add(name);
             int eventCount = ((currentMode == Mode.DEC) ? DEC_EVENTS.size() : HEP_EVENTS.size());
             for (int i = 0; i < eventCount; i++) v.add(null);
-            v.add(0); // total
+            v.add(0);
             tableModel.addRow(v);
+            updateRanks();
         }
     }
 
     private int findRowByName(String name) {
+        int nameCol = tableModel.findColumn("Competitor");
         for (int r = 0; r < tableModel.getRowCount(); r++) {
-            Object val = tableModel.getValueAt(r, 0);
+            Object val = tableModel.getValueAt(r, nameCol);
             if (val != null && val.toString().equalsIgnoreCase(name)) return r;
         }
         return -1;
@@ -193,7 +188,7 @@ public class MainGUI {
 
         tableModel.setValueAt(score, row, col);
         int total = 0;
-        int firstEventCol = 1;
+        int firstEventCol = 2;
         int lastEventCol = tableModel.getColumnCount() - 2;
         for (int c = firstEventCol; c <= lastEventCol; c++) {
             Object v = tableModel.getValueAt(row, c);
@@ -203,6 +198,7 @@ public class MainGUI {
             }
         }
         tableModel.setValueAt(total, row, tableModel.getColumnCount() - 1);
+        updateRanks();
     }
 
     private int findDisciplineColumn(String discipline) {
@@ -210,6 +206,31 @@ public class MainGUI {
             if (tableModel.getColumnName(c).equalsIgnoreCase(discipline)) return c;
         }
         return -1;
+    }
+
+    private void updateRanks() {
+        int totalCol = tableModel.findColumn("Total");
+        int rankCol = tableModel.findColumn("Rank");
+        int n = tableModel.getRowCount();
+        List<int[]> rows = new ArrayList<>();
+        for (int r = 0; r < n; r++) {
+            int total = 0;
+            Object v = tableModel.getValueAt(r, totalCol);
+            if (v instanceof Number) total = ((Number) v).intValue();
+            else if (v != null) try { total = Integer.parseInt(v.toString()); } catch (Exception ignored) {}
+            rows.add(new int[]{r, total});
+        }
+        rows.sort((a, b) -> Integer.compare(b[1], a[1]));
+        int prevTotal = Integer.MIN_VALUE;
+        int prevRank = 0;
+        for (int i = 0; i < rows.size(); i++) {
+            int idx = rows.get(i)[0];
+            int tot = rows.get(i)[1];
+            int rank = (tot == prevTotal) ? prevRank : (i + 1);
+            tableModel.setValueAt(rank, idx, rankCol);
+            prevTotal = tot;
+            prevRank = rank;
+        }
     }
 
     private class CalculateButtonListener implements ActionListener {
@@ -229,16 +250,13 @@ public class MainGUI {
             }
 
             try {
-                double result = Double.parseDouble(resultText);
-
+                double result = Double.parseDouble(resultText.replace(',', '.'));
                 int score = calculateScore(discipline, result);
                 outputArea.append("Competitor: " + name + "\n");
                 outputArea.append("Discipline: " + discipline + "\n");
                 outputArea.append("Result: " + result + "\n");
                 outputArea.append("Score: " + score + "\n\n");
-
                 setScoreInTable(name, discipline, score);
-
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(frame, "Please enter a valid number for the result.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
             } catch (UnsupportedOperationException ex) {
@@ -266,7 +284,6 @@ public class MainGUI {
                 case "Shot Put":     return new DecaShotPut().calculateResult(result);
             }
         } else {
-            // HEPTATHLON (7 grenar)
             switch (discipline) {
                 case "100m Hurdles": return new Hep100MHurdles().calculateResult(result);
                 case "High Jump":    return new HeptHightJump().calculateResult(result);
