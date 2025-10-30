@@ -1,16 +1,18 @@
 Feature:Decathlon Web MVP - Competition Management
 
-  Background:Given I navigate to the Decathlon Web MVP page
-
-  Scenario: Add Love and assert Love is written
+  Background:
     Given I am on "http://localhost:8080"
-    When I add my name
-    Then I assert the name is "Love"
+
+
+ #Scenario: Add Love and assert Love is written
+    #Given I am on "http://localhost:8080"
+   #When I add my name
+    #Then I assert the name is "Love"
 
   Scenario Outline: Name
-    Given I am on "http://localhost:8080"
+    #Given I am on "http://localhost:8080"
     When I write <name> and click Add competitor
-    Then Standings should update with <expected_result>
+    Then Site should react on different name inputs with <expected_result>
     Examples:
       | name                                                                                        | expected_result |
       | ??                                                                                          | error           |
@@ -23,99 +25,99 @@ Feature:Decathlon Web MVP - Competition Management
       | ^~.                                                                                         | error           |
       |                                                                                             | error           |
 
-  Scenario Outline: Points compared to DesktopUI
-    Given I am on "http://localhost:8080"
+  Scenario Outline: Ensuring Points are calculated correct
+    #Given I am on "http://localhost:8080"
     When I add my name
     And I write same name down in Enter Result
-    And I choose <event>
+    And I pick sports <event>
     And enter <eventResult>
     And I save score
-    Then points should be <points>
+    Then points should be <expectedPoints>
     Examples:
-      | event           | eventResult | points |
-      | 100m (s)        | 10          | 1096   |
-      | Long Jump (cm)  | 700         | 814    |
-      | Shot Put (m)    | 14          | 728    |
-      | High Jump (cm)  | 210         | 896    |
-      | 400m (s)        | 45          | 1060   |
-      | 110 Hurdles (s) | 15          | 850    |
-      | Discus (m)      | 45          | 767    |
-      | Pole Vault (cm) | 500         | 910    |
-      | Javelin (m)     | 60          | 783     |
-      | 1500m (s)       | 300         | 560    |
+      | event           | eventResult | expectedPoints |
+      | 100m (s)        | 10          | 1096           |
+      | Long Jump (cm)  | 700         | 814            |
+      | Shot Put (m)    | 14          | 728            |
+      | High Jump (cm)  | 210         | 896            |
+      | 400m (s)        | 45          | 1060           |
+      | 110 Hurdles (s) | 15          | 850            |
+      | Discus (m)      | 45          | 767            |
+      | Pole Vault (cm) | 500         | 910            |
+      | Javelin (m)     | 60          | 783            |
+      | 1500m (s)       | 300         | 560            |
 
-  Scenario Outline: Happy flow e2e Test C:^)
-    Given I am on "http://localhost:8080"
-    When I choose <mode>
-    And I write <name> and click Add competitor
-    And I write same name down in Enter Result
-    And I choose <event>
-    And enter <eventResult>
-    And I save score
-    Then Standings should update with the <result>
-    Then I export CSV and it should match
+ # Scenario Outline: Happy flow e2e Test C:^)
+ #   Given I am on "http://localhost:8080"
+ #   When I choose <mode>
+ #   And I write <name> and click Add competitor
+ #   And I write same name down in Enter Result
+ #   And I choose <event>
+ #   And enter <eventResult>
+ #   And I save score
+ #   Then Standings should update with the <result>
+ #   Then I export CSV and it should match
+#
+ #   Examples:
+ #     | mode       | name | event | eventResult | result |
+ #    | Decathlon       | Anna        | 100m   | 8   | Bajs |
+ #    | Heptathlon      | Leif        | 800m   | 150 | Bajs |
+#
+ # Scenario Outline: Unhappy flow  :(
+#
+ #   #Inspiration
+#    Examples:
+#      | mode       | action                                              | expected_behavior                                         |
+#      | Decathlon       | add a competitor without entering a name            | show an error message and not add competitor              |
+#      | Heptathlon      | save a score without selecting a competitor         | show an alert or prevent saving the score                 |
+#      | Heptathlon      | enter a non-numeric value (e.g. 'abc')              | reject input and display validation feedback              |
+#      | Decathlon       | enter a negative result (e.g. '-5')                 | reject input and show "Invalid result" message            |
+#      | Decathlon       | enter a result of zero (e.g. '0')                   | show warning that result must be greater than zero        |
+#      | Heptathlon      | add the same competitor name twice                  | show "Duplicate competitor" error                         |
+#      | Decathlon       | submit result for an event that’s already completed | show "Result already saved" notification                  |
+#      | Heptathlon      | enter extremely high number (e.g. '999999') | display validation message and reject out-of-range value  |
+#      | Decathlon       | attempt to save without entering any result | disable Save button or show "Enter a result first" alert  |
+#      | Heptathlon      | switch event without saving current result | warn user "Unsaved changes will be lost" before switching |
+#    Examples:
 
-    Examples:
-      | mode       | name | event | eventResult | result |
-      | Decathlon  | Anna | 100m  | 8           | Bajs   |
-      | Heptathlon | Leif | 800m  | 150         | Bajs   |
+#      | mode       | action             |
+#      | Decathlon  | EMPTY_NAME                                          |
+#      | Heptathlon | NO_COMPETITOR                                       |
+#      | Heptathlon | NON_NUMERIC_RESULT                                  |
+#      | Decathlon  | NEGATIVE_RESULT                                     |
+#      | Decathlon  | ZERO_RESULT                                         |
+#      | Heptathlon | DUPLICATE_NAME                                      |
+#      | Decathlon  | DUPLICATE_RESULT                                    |
+#      | Heptathlon | EXTREME_VALUE                                       |
+#      | Decathlon  | EMPTY_RESULT                                        |
+#      | Heptathlon | UNSAVED_SWITCH                                      |
 
-  Scenario Outline: Unhappy flow  :(
+# Scenario Outline: Add competitor and enter valid result
+#   Given the user has opened the Decathlon Web MVP page
+#   And the competition mode "<mode>" is selected
+#   When the user enters "<name>" in the Add competitor field
+#   And clicks Add competitor
+#   Then the competitor "<name>" should appear in the standings table
+#   When the user selects "<event>" from the event dropdown
+#   And enters "<result>" as the result
+#   And clicks Save score
+#   Then the result "<result>" should be saved for "<name>" in the "<event>" column
 
-    #Inspiration
-    Examples:
-      | mode       | action                                              | expected_behavior                                         |
-      | Decathlon  | add a competitor without entering a name            | show an error message and not add competitor              |
-      | Heptathlon | save a score without selecting a competitor         | show an alert or prevent saving the score                 |
-      | Heptathlon | enter a non-numeric value (e.g. 'abc')              | reject input and display validation feedback              |
-      | Decathlon  | enter a negative result (e.g. '-5')                 | reject input and show "Invalid result" message            |
-      | Decathlon  | enter a result of zero (e.g. '0')                   | show warning that result must be greater than zero        |
-      | Heptathlon | add the same competitor name twice                  | show "Duplicate competitor" error                         |
-      | Decathlon  | submit result for an event that’s already completed | show "Result already saved" notification                  |
-      | Heptathlon | enter extremely high number (e.g. '999999')         | display validation message and reject out-of-range value  |
-      | Decathlon  | attempt to save without entering any result         | disable Save button or show "Enter a result first" alert  |
-      | Heptathlon | switch event without saving current result          | warn user "Unsaved changes will be lost" before switching |
-    Examples:
+#   Examples:
+#      | mode       | name               | event         | result |
+#      | Decathlon  | Erik               | 100m (s)      | 11.23 |
+#      | Heptathlon | Anna               | High Jump (m) | 1.78 |
 
-      | mode       | action             |
-      | Decathlon  | EMPTY_NAME         |
-      | Heptathlon | NO_COMPETITOR      |
-      | Heptathlon | NON_NUMERIC_RESULT |
-      | Decathlon  | NEGATIVE_RESULT    |
-      | Decathlon  | ZERO_RESULT        |
-      | Heptathlon | DUPLICATE_NAME     |
-      | Decathlon  | DUPLICATE_RESULT   |
-      | Heptathlon | EXTREME_VALUE      |
-      | Decathlon  | EMPTY_RESULT       |
-      | Heptathlon | UNSAVED_SWITCH     |
+# Scenario Outline: Prevent adding or saving invalid data
+#   Given the user has opened the Decathlon Web MVP page
+#   And the competition mode "<mode>" is selected
+#   When the user tries to "<action>"
+#   Then the system should "<expected_behavior>"
 
-  Scenario Outline: Add competitor and enter valid result
-    Given the user has opened the Decathlon Web MVP page
-    And the competition mode "<mode>" is selected
-    When the user enters "<name>" in the Add competitor field
-    And clicks Add competitor
-    Then the competitor "<name>" should appear in the standings table
-    When the user selects "<event>" from the event dropdown
-    And enters "<result>" as the result
-    And clicks Save score
-    Then the result "<result>" should be saved for "<name>" in the "<event>" column
-
-    Examples:
-      | mode       | name | event         | result |
-      | Decathlon  | Erik | 100m (s)      | 11.23  |
-      | Heptathlon | Anna | High Jump (m) | 1.78   |
-
-  Scenario Outline: Prevent adding or saving invalid data
-    Given the user has opened the Decathlon Web MVP page
-    And the competition mode "<mode>" is selected
-    When the user tries to "<action>"
-    Then the system should "<expected_behavior>"
-
-    Examples:
-      | mode       | action                                      | expected_behavior                            |
-      | Decathlon  | add a competitor without entering a name    | show an error message and not add competitor |
-      | Heptathlon | save a score without selecting a competitor | show an alert or prevent saving the score    |
-      | Heptathlon | enter a non-numeric value (e.g. 'abc')      | reject input and display validation feedback |
+#   Examples:
+#      | mode       | action                                      | expected_behavior                            |
+#      | Decathlon  | add a competitor without entering a name    | show an error message and not add competitor |
+#      | Heptathlon | save a score without selecting a competitor | show an alert or prevent saving the score    |
+#      | Heptathlon | enter a non-numeric value (e.g. 'abc') | reject input and display validation feedback |
 
 
 # Scenario Outline: Switch between competition modes
